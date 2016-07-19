@@ -1,0 +1,86 @@
+<md-card>
+  <md-card-content>
+
+    <div [hidden] = "communicator.connectionStatus!=1"
+         style="float: right;">Connecting...
+    </div>
+
+    <md-progress-circle mode="indeterminate"
+                        [hidden] = "communicator.connectionStatus!=1"
+                        style="float: right;margin-right: 5px;width: 25px;height: 20px;">
+    </md-progress-circle>
+
+    <md-input placeholder="Slave ID"
+              [(ngModel)]="slaveID"
+              (change)="onchange($event)">
+    </md-input>
+
+    <select name="select"
+            (change)="onReadTypeChange($event.target.value)">
+      <option value=01>01: Read coil status</option>
+      <option value=02>02: Read input status</option>
+      <option value=03 selected>03: Read holding registers</option>
+      <option value=04>04: Read input registers</option>
+      <option value=05>05: Force single coil</option>
+      <option value=06>06: Preset single register</option>
+      <option value=17>17: Report slave ID</option>
+    </select>
+
+    <md-input [hidden]="readType==17"
+              placeholder="Address"
+              [(ngModel)]="address"
+              (change)="onchange($event)">
+    </md-input>
+
+    <md-input [hidden]="readType>4"
+              placeholder="Quantity"
+              [(ngModel)]="quantity"
+              (change)="onchange($event)">
+    </md-input>
+
+
+    <md-input [hidden]="readType<5 || readType==17"
+              placeholder="Value"
+              [(ngModel)]="value"
+              (change)="onchange($event)">
+    </md-input>
+
+    <md-input placeholder="Repeat every"
+              [(ngModel)]="repeatTimer"
+              (change)="onchange($event)"
+              value="0">
+      <span md-suffix>(ms)</span>
+    </md-input>
+
+    <h4>Modbus Message: {{message}}</h4>
+
+    <button md-raised-button
+            (click)="onSend($event)"
+            [disabled]="isRequestPending || !isValidMesg"
+            [hidden]="communicator.connectionStatus!=2"
+            color="accent" style="float: right;">Send</button>
+
+    <button md-raised-button
+            (click)="onClear($event)"
+            [disabled]="isRequestPending"
+            [hidden]="communicator.connectionStatus!=2"
+            color="primary" style="float: right;margin-right: 10px;">Clear</button>
+
+    <button md-raised-button
+            (click)="onConnect($event)"
+            [hidden]="communicator.connectionStatus!=0"
+            color="primary" style="float: right;margin-right: 10px;">Connect</button>
+
+
+  </md-card-content>
+</md-card>
+
+<br>
+<md-list>
+  <md-list-item *ngFor="let message of messages">
+    <p md-line>
+      {{message.timestampReceived | date:'jms'}} {{message.response | modbus}} {{message.error}} <br>
+      {{message.timestampSent | date:'jms'}} {{message.request | modbus}}
+    </p>
+  </md-list-item>
+</md-list>
